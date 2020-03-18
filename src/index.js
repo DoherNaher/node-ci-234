@@ -6,6 +6,6 @@ app.get('/',(req,resp)=>{
     resp.send('Hello')
 })
 
-app.listen(3001,'0.0.0.0',()=>{
+app.listen(process.env.PORT || 3000 ,()=>{
     console.log('Server started')
 })
