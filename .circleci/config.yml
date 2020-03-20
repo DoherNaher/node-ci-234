@@ -46,7 +46,7 @@ jobs: # a collection of steps
             tar -xz -C /tmp -f /tmp/docker-$VER.tgz
             sudo chown -R $(whoami) /usr/bin
             cp -r /tmp/docker/* /usr/bin
-            ls /usr/bin/docker
+            ls /usr/bin/docker/*
       - run:
           name: Build Docker image
           command: docker build -t dockeridtest12345/node-ci-234:$CIRCLE_SHA1 .
