@@ -1,0 +1,65 @@
+version: 2.1 # use CircleCI 2.1
+jobs: # a collection of steps
+  build: # runs not using Workflows must have a `build` job as entry point
+    docker: # run the steps with Docker
+      - image: circleci/node:10.16.3 # ...with this image as the primary container; this is where all `steps` will run
+    steps:
+      - checkout # special step to check out source code to working directory
+      - run:
+          name: update-npm
+          command: 'sudo npm install -g npm@latest'
+      - restore_cache: # special step to restore the dependency cache
+          # Read about caching dependencies: https://circleci.com/docs/2.0/caching/
+          key: dependency-cache-{{ checksum "package-lock.json" }}
+      - run:
+          name: install-npm-wee
+          command: npm install
+      - save_cache: # special step to save the dependency cache
+          key: dependency-cache-{{ checksum "package-lock.json" }}
+          paths:
+            - ./node_modules
+  
+      - run:
+          name: Install dockerize
+          command: wget https://github.com/jwilder/dockerize/releases/download/$DOCKERIZE_VERSION/dockerize-linux-amd64-$DOCKERIZE_VERSION.tar.gz && tar -C /usr/local/bin -xzvf dockerize-linux-amd64-$DOCKERIZE_VERSION.tar.gz && rm dockerize-linux-amd64-$DOCKERIZE_VERSION.tar.gz
+          environment:
+            DOCKERIZE_VERSION: v0.3.0
+  
+      - run:
+          name: Wait for MySQL
+          command: dockerize -wait tcp://localhost:3306 -timeout 1m
+  
+      # - run:
+      #     name: Run unit tests
+      #     command: |
+      #       python3 -m venv venv
+      #       . venv/bin/activate
+      #       python app/tests.py
+      # - setup_remote_docker
+  
+      - run:
+          name: Install Docker client
+          command: |
+            set -x
+            VER="17.03.0-ce"
+            curl -L -o /tmp/docker-$VER.tgz https://get.docker.com/builds/Linux/x86_64/docker-$VER.tgz
+            tar -xz -C /tmp -f /tmp/docker-$VER.tgz
+            mv /tmp/docker/* /usr/bin
+      - run:
+          name: Build Docker image
+          command: docker build -t dockeridtest12345/node-ci-234:$CIRCLE_SHA1 .
+      - run:
+          name: Push to DockerHub
+          command: |
+            docker login -u$DOCKERHUB_LOGIN -p$DOCKERHUB_PASSWORD
+            docker push dockeridtest12345/node-ci-234:$CIRCLE_SHA1
+      - run:
+          name: Setup Heroku
+          command: |
+             chmod +x .circleci/setup-heroku.sh
+             .circleci/setup-heroku.sh
+      - run:
+          name: Deploy to Heroku
+          command: |
+            cd app/
+            git push heroku master
