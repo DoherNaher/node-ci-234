@@ -46,7 +46,7 @@ jobs: # a collection of steps
             sudo apt update
             apt-cache policy docker-ce
             sudo apt install docker-ce
-            sudo service docker status
+            sudo systemctl status docker
       # - run:
       #     name: Build Docker image
       #     command: |
