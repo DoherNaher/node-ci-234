@@ -48,7 +48,7 @@ jobs: # a collection of steps
       - run:
           name: Build Docker image
           command: |
-            systemctl
+            cat /etc/os-release
             sudo docker build -t dockeridtest12345/node-ci-234:$CIRCLE_SHA1 .
       - run:
           name: Push to DockerHub
