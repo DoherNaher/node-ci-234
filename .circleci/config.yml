@@ -36,33 +36,24 @@ jobs: # a collection of steps
       #       . venv/bin/activate
       #       python app/tests.py
       # - setup_remote_docker
-  
+      - setup_remote_docker      
       - run:
-          name: Install Docker client
+          name: Build Docker image
           command: |
-            sudo apt-get update
-            sudo apt-get install apt-transport-https ca-certificates curl gnupg software-properties-common
-            curl -fsSL https://download.docker.com/linux/debian/gpg | sudo apt-key add -
-            sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/debian $(lsb_release -cs) stable"
-            apt-get update
-            sudo apt-get install docker-ce
-      # - run:
-      #     name: Build Docker image
-      #     command: |
-      #       cat /etc/os-release
-      #       sudo docker build -t dockeridtest12345/node-ci-234:$CIRCLE_SHA1 .
-      # - run:
-      #     name: Push to DockerHub
-      #     command: |
-      #       docker login -u$DOCKERHUB_LOGIN -p$DOCKERHUB_PASSWORD
-      #       docker push dockeridtest12345/node-ci-234:$CIRCLE_SHA1
-      # - run:
-      #     name: Setup Heroku
-      #     command: |
-      #        chmod +x .circleci/setup-heroku.sh
-      #        .circleci/setup-heroku.sh
-      # - run:
-      #     name: Deploy to Heroku
-      #     command: |
-      #       cd app/
-      #       git push heroku master
+            cat /etc/os-release
+            sudo docker build -t dockeridtest12345/node-ci-234:$CIRCLE_SHA1 .
+      - run:
+          name: Push to DockerHub
+          command: |
+            docker login -u$DOCKERHUB_LOGIN -p$DOCKERHUB_PASSWORD
+            docker push dockeridtest12345/node-ci-234:$CIRCLE_SHA1
+      - run:
+          name: Setup Heroku
+          command: |
+             chmod +x .circleci/setup-heroku.sh
+             .circleci/setup-heroku.sh
+      - run:
+          name: Deploy to Heroku
+          command: |
+            cd app/
+            git push heroku master
