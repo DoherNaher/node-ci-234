@@ -47,9 +47,7 @@ jobs: # a collection of steps
             sudo mv /tmp/docker/* /usr/bin
       - run:
           name: Build Docker image
-          command: |
-            ls -la
-            sudo systemctl start docker
+          command: |  
             docker build -t dockeridtest12345/node-ci-234:$CIRCLE_SHA1 .
       - run:
           name: Push to DockerHub
